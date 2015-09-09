@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -21,6 +22,22 @@ var (
 type gitinfo struct {
 	Name string
 	Date time.Time
+}
+
+type gitInfoSorter struct {
+	repos []gitinfo
+}
+
+func (r gitInfoSorter) Len() int {
+	return len(r.repos)
+}
+
+func (r gitInfoSorter) Swap(i, j int) {
+	r.repos[i], r.repos[j] = r.repos[j], r.repos[i]
+}
+
+func (r gitInfoSorter) Less(i, j int) bool {
+	return r.repos[i].Date.Before(r.repos[j].Date)
 }
 
 // get the repositories list
@@ -78,7 +95,7 @@ func gitRepository(repo string) (*gitinfo, error) {
 
 func main() {
 	flag.Parse()
-	gitInfoRepo := make([]*gitinfo, 0)
+	gitReposInfo := make([]gitinfo, 0)
 	if *gitReposPath == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -95,6 +112,8 @@ func main() {
 		}
 		indexLastSlash := strings.LastIndex(r, "/") + 1
 		info.Name = r[indexLastSlash:]
-		gitInfoRepo = append(gitInfoRepo, info)
+		gitReposInfo = append(gitReposInfo, *info)
 	}
+	reposSorted := gitInfoSorter{repos: gitReposInfo}
+	sort.Sort(reposSorted)
 }
