@@ -37,7 +37,8 @@ func (r gitInfoSorter) Swap(i, j int) {
 }
 
 func (r gitInfoSorter) Less(i, j int) bool {
-	return r.repos[i].Date.Before(r.repos[j].Date)
+	// Sort from recent to older change
+	return r.repos[j].Date.Before(r.repos[i].Date)
 }
 
 // get the repositories list
