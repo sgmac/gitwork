@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -94,6 +96,17 @@ func gitRepository(repo string) (*gitinfo, error) {
 	return gitInfo, nil
 }
 
+func listGitInfo(repos gitInfoSorter) {
+	w := tabwriter.NewWriter(os.Stdout, 25, 8, 0, ' ', 0)
+	fmt.Fprintln(w, "GIT\tLAST CHANGE")
+	for _, r := range repos.repos {
+		date := time.Now().Sub(r.Date)
+		daysAgo := int(date.Hours()) / 24
+		fmt.Fprintf(w, "%s\t%d days ago\n", r.Name, daysAgo)
+	}
+	w.Flush()
+}
+
 func main() {
 	flag.Parse()
 	gitReposInfo := make([]gitinfo, 0)
@@ -117,4 +130,5 @@ func main() {
 	}
 	reposSorted := gitInfoSorter{repos: gitReposInfo}
 	sort.Sort(reposSorted)
+	listGitInfo(reposSorted)
 }
