@@ -132,6 +132,7 @@ func main() {
 	flag.Parse()
 	gitReposInfo := make([]gitinfo, 0)
 	if *gitReposPath == "" {
+		fmt.Fprintf(os.Stderr, "usage: gitwork [OPTIONS]\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
