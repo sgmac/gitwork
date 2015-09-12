@@ -16,9 +16,17 @@ import (
 	"github.com/libgit2/git2go"
 )
 
+const (
+	grey  = "\x1b[1;30m"
+	red   = "\x1b[1;31m"
+	green = "\x1b[1;32m"
+	reset = "\x1b[0m"
+)
+
 var (
 	gitPathEnv   = os.Getenv("GIT")
 	gitReposPath = flag.String("g", gitPathEnv, "Path to git repositories")
+	activeWork   = 90
 )
 
 type gitinfo struct {
@@ -97,12 +105,18 @@ func gitRepository(repo string) (*gitinfo, error) {
 }
 
 func listGitInfo(repos gitInfoSorter) {
+	var message string
 	w := tabwriter.NewWriter(os.Stdout, 25, 8, 0, ' ', 0)
 	fmt.Fprintln(w, "GIT\tLAST CHANGE")
+
 	for _, r := range repos.repos {
 		date := time.Now().Sub(r.Date)
 		daysAgo := int(date.Hours()) / 24
-		fmt.Fprintf(w, "%s\t%d days ago\n", r.Name, daysAgo)
+		message = fmt.Sprintf("%d %sdays ago%s %s(abandoned)%s", daysAgo, grey, reset, red, reset)
+		if daysAgo < activeWork {
+			message = fmt.Sprintf("%d %sdays ago%s", daysAgo, green, reset)
+		}
+		fmt.Fprintf(w, "%s\t%s\n", r.Name, message)
 	}
 	w.Flush()
 }
