@@ -30,8 +30,9 @@ var (
 )
 
 type gitinfo struct {
-	Name string
-	Date time.Time
+	Name   string
+	Date   time.Time
+	Branch string
 }
 
 type gitInfoSorter struct {
@@ -98,8 +99,14 @@ func gitRepository(repo string) (*gitinfo, error) {
 	}
 	author := lastCommit.Author()
 
+	branch, err := head.Branch().Name()
+	if err != nil {
+		return nil, err
+	}
+
 	gitInfo := &gitinfo{
-		Date: author.When,
+		Date:   author.When,
+		Branch: branch,
 	}
 	return gitInfo, nil
 }
@@ -107,7 +114,7 @@ func gitRepository(repo string) (*gitinfo, error) {
 func listGitInfo(repos gitInfoSorter) {
 	var message string
 	w := tabwriter.NewWriter(os.Stdout, 25, 8, 0, ' ', 0)
-	fmt.Fprintln(w, "GIT\tLAST CHANGE")
+	fmt.Fprintln(w, "GIT\tBRANCH\tLAST CHANGE")
 
 	for _, r := range repos.repos {
 		date := time.Now().Sub(r.Date)
@@ -116,7 +123,7 @@ func listGitInfo(repos gitInfoSorter) {
 		if daysAgo < activeWork {
 			message = fmt.Sprintf("%d %sdays ago%s", daysAgo, green, reset)
 		}
-		fmt.Fprintf(w, "%s\t%s\n", r.Name, message)
+		fmt.Fprintf(w, "%s\t%s\t%s\n", r.Name, r.Branch, message)
 	}
 	w.Flush()
 }
