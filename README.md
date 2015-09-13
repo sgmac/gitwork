@@ -2,6 +2,14 @@ Gitwork
 -------
 An excuse to use the git2go API and track what repositories are the most used.
 
+Depedencies
+-----------
+You need to install:
+
+- [libgit2](https://github.com/libgit2/libgit2) 
+- [git2go](https://github.com/libgit2/git2go) 
+- [logrus](https://github.com/Sirupsen/logrus) 
+
 Getting started
 ---------------
 By default looks for the ```$GIT``` env var. If it's defined, points to the main
