@@ -12,6 +12,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
 	"github.com/libgit2/git2go"
 )
@@ -26,6 +27,8 @@ const (
 var (
 	gitPathEnv   = os.Getenv("GIT")
 	gitReposPath = flag.String("g", gitPathEnv, "Path to git repositories")
+	configPath   = path.Join(os.Getenv("HOME"), ".gitwork")
+	configFile   = "config"
 	activeWork   = 90
 )
 
@@ -37,6 +40,15 @@ type gitinfo struct {
 
 type gitInfoSorter struct {
 	repos []gitinfo
+}
+
+type Config struct {
+	Global Global
+}
+
+type Global struct {
+	//TODO: Provide branch option
+	DaysAgo int `toml:"daysago"`
 }
 
 func (r gitInfoSorter) Len() int {
@@ -128,8 +140,36 @@ func listGitInfo(repos gitInfoSorter) {
 	w.Flush()
 }
 
+func createConfigFile() error {
+	var config Config
+	file := path.Join(configPath, configFile)
+	var f *os.File
+	// create config path
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		err := os.Mkdir(configPath, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	// create config file
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		f, err = os.Create(file)
+		if err != nil {
+			return err
+		}
+	}
+	toml.NewEncoder(f).Encode(&config)
+	return nil
+}
+
 func main() {
 	flag.Parse()
+	// check if the config file exits or create an empty one
+	err := createConfigFile()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
 	gitReposInfo := make([]gitinfo, 0)
 	if *gitReposPath == "" {
 		fmt.Fprintf(os.Stderr, "usage: gitwork [OPTIONS]\n")
