@@ -29,7 +29,7 @@ var (
 	gitReposPath = flag.String("g", gitPathEnv, "Path to git repositories")
 	configPath   = path.Join(os.Getenv("HOME"), ".gitwork")
 	configFile   = "config"
-	activeWork   = 90
+	activeWork   = flag.Int("d", 90, "Set days to mark abandoned a git repository")
 )
 
 type gitinfo struct {
@@ -132,7 +132,7 @@ func listGitInfo(repos gitInfoSorter) {
 		date := time.Now().Sub(r.Date)
 		daysAgo := int(date.Hours()) / 24
 		message = fmt.Sprintf("%d %sdays ago%s %s(abandoned)%s", daysAgo, grey, reset, red, reset)
-		if daysAgo < activeWork {
+		if daysAgo < *activeWork {
 			message = fmt.Sprintf("%d %sdays ago%s", daysAgo, green, reset)
 		}
 		fmt.Fprintf(w, "%s\t%s\t%s\n", r.Name, r.Branch, message)
@@ -186,9 +186,8 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	if config.Global.DaysAgo != 0 {
-		fmt.Println("DaysAgo")
-		activeWork = config.Global.DaysAgo
+	if config.Global.DaysAgo != 0 && *activeWork == 90 {
+		*activeWork = config.Global.DaysAgo
 	}
 
 	gitReposInfo := make([]gitinfo, 0)
