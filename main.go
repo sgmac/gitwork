@@ -162,12 +162,33 @@ func createConfigFile() error {
 	return nil
 }
 
+func readConfigFile() (*Config, error) {
+	var config *Config
+	file := path.Join(configPath, configFile)
+
+	_, err := toml.DecodeFile(file, &config)
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
+}
+
 func main() {
 	flag.Parse()
 	// check if the config file exits or create an empty one
 	err := createConfigFile()
 	if err != nil {
 		logrus.Fatal(err)
+	}
+
+	config, err := readConfigFile()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	if config.Global.DaysAgo != 0 {
+		fmt.Println("DaysAgo")
+		activeWork = config.Global.DaysAgo
 	}
 
 	gitReposInfo := make([]gitinfo, 0)
