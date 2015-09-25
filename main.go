@@ -142,6 +142,7 @@ func listGitInfo(repos gitInfoSorter) {
 
 func createConfigFile() error {
 	var config Config
+	config.Global.DaysAgo = *activeWork
 	file := path.Join(configPath, configFile)
 	var f *os.File
 	// create config path
