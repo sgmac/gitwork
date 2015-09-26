@@ -127,4 +127,8 @@ func TestGetRepositories(t *testing.T) {
 	if len(reposExpected) != len(repos) {
 		t.Error("Repositories not found")
 	}
+
+	defer func() {
+		os.RemoveAll(gitPathEnv)
+	}()
 }
