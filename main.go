@@ -27,6 +27,7 @@ const (
 var (
 	gitPathEnv   = os.Getenv("GIT")
 	gitReposPath = flag.String("g", gitPathEnv, "Path to git repositories")
+	branch       = flag.String("b", "current", "Only repositories in specified branch")
 	configPath   = path.Join(os.Getenv("HOME"), ".gitwork")
 	configFile   = "config"
 	activeWork   = flag.Int("d", 90, "Set days to mark abandoned a git repository")
@@ -129,6 +130,9 @@ func listGitInfo(repos gitInfoSorter) {
 	fmt.Fprintln(w, "GIT\tBRANCH\tLAST CHANGE")
 
 	for _, r := range repos.repos {
+		if *branch != "current" && *branch != r.Branch {
+			continue
+		}
 		date := time.Now().Sub(r.Date)
 		daysAgo := int(date.Hours()) / 24
 		message = fmt.Sprintf("%d %sdays ago%s %s(abandoned)%s", daysAgo, grey, reset, red, reset)

@@ -26,5 +26,8 @@ Caveats
 There are some things to improve:
 
 - The number of days whereby a repository is marked as abandoned is 90 days. This is harcoded, it could be easily move to an external config file.
-- It reads the branch you are sitted on, it would be nice to provide a flag for a certain branch.
 - If the number of days is zero, mark as active.
+
+Update
+------
+- Add flag to provide branch you are interested in, only those repositories are listed.
